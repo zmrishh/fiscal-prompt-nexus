@@ -7,6 +7,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import PromptPage from "./pages/PromptPage";
 import Documents from "./pages/Documents";
+import BankSync from "./pages/BankSync";
+import Expenses from "./pages/Expenses";
+import GSTCompliance from "./pages/GSTCompliance";
+import Payroll from "./pages/Payroll";
+import InvestorReports from "./pages/InvestorReports";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,12 +27,12 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/prompt" element={<PromptPage />} />
           <Route path="/documents" element={<Documents />} />
-          <Route path="/bank" element={<div className="p-6">Bank Sync - Coming Soon</div>} />
-          <Route path="/expenses" element={<div className="p-6">Expenses - Coming Soon</div>} />
-          <Route path="/gst" element={<div className="p-6">GST & Compliance - Coming Soon</div>} />
-          <Route path="/payroll" element={<div className="p-6">Payroll - Coming Soon</div>} />
-          <Route path="/reports" element={<div className="p-6">Investor Reports - Coming Soon</div>} />
-          <Route path="/settings" element={<div className="p-6">Settings - Coming Soon</div>} />
+          <Route path="/bank" element={<BankSync />} />
+          <Route path="/expenses" element={<Expenses />} />
+          <Route path="/gst" element={<GSTCompliance />} />
+          <Route path="/payroll" element={<Payroll />} />
+          <Route path="/reports" element={<InvestorReports />} />
+          <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
