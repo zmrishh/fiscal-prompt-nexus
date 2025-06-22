@@ -51,8 +51,8 @@ export interface DocumentFilters {
   type?: DocumentType;
   status?: DocumentStatus;
   dateRange?: {
-    from: Date;
-    to: Date;
+    from?: Date;
+    to?: Date;
   };
   amountRange?: {
     min: number;
