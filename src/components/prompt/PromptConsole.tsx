@@ -21,12 +21,12 @@ interface PromptMessage {
 }
 
 const examplePrompts = [
-  "Generate an invoice for ₹50,000 to Flipkart for June",
-  "Show my burn vs runway graph",
-  "Summarize this bank statement PDF",
+  "Generate invoice for ₹50K to Flipkart",
+  "Show burn vs runway graph",
+  "Summarize bank statement PDF",
   "File GSTR-3B for May",
-  "Create P&L statement for Q1",
-  "Calculate TDS for this month's payroll"
+  "Create Q1 P&L statement",
+  "Calculate monthly TDS"
 ];
 
 export const PromptConsole: React.FC = () => {
@@ -74,40 +74,40 @@ export const PromptConsole: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Prompt Console</h1>
-        <p className="text-gray-600">Ask your AI CFO assistant to generate documents, analyze data, or automate financial tasks using natural language.</p>
+    <div className="h-full p-4 lg:p-6 space-y-4 lg:space-y-6">
+      <div className="space-y-2">
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">AI Prompt Console</h1>
+        <p className="text-sm lg:text-base text-gray-600">Ask your AI CFO assistant to generate documents, analyze data, or automate financial tasks using natural language.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Card className="h-[600px] flex flex-col">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+      <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 lg:gap-6 h-[calc(100vh-12rem)]">
+        <div className="lg:col-span-2 flex flex-col min-h-0">
+          <Card className="flex-1 flex flex-col min-h-0">
+            <CardHeader className="flex-shrink-0 pb-3">
+              <CardTitle className="flex items-center justify-between text-lg">
                 <span>Conversation</span>
-                <Badge variant="secondary">Live</Badge>
+                <Badge variant="secondary" className="text-xs">Live</Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
-              <ScrollArea className="flex-1 pr-4">
+            <CardContent className="flex-1 flex flex-col min-h-0 p-4 pt-0">
+              <ScrollArea className="flex-1 pr-2 mb-4">
                 <div className="space-y-4">
                   {messages.map((message) => (
                     <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] p-4 rounded-lg ${
+                      <div className={`max-w-[85%] lg:max-w-[80%] p-3 lg:p-4 rounded-lg break-words ${
                         message.type === 'user' 
                           ? 'bg-green-600 text-white' 
                           : 'bg-gray-100 text-gray-900'
                       }`}>
-                        <p className="text-sm">{message.content}</p>
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                         {message.result && (
                           <div className="mt-3 p-3 bg-white rounded border">
-                            <div className="flex items-center space-x-2">
-                              {message.result.type === 'document' && <FileText className="h-4 w-4 text-green-600" />}
-                              {message.result.type === 'chart' && <BarChart3 className="h-4 w-4 text-green-600" />}
-                              <span className="text-sm font-medium text-gray-900">{message.result.title}</span>
+                            <div className="flex items-center space-x-2 mb-2">
+                              {message.result.type === 'document' && <FileText className="h-4 w-4 text-green-600 flex-shrink-0" />}
+                              {message.result.type === 'chart' && <BarChart3 className="h-4 w-4 text-green-600 flex-shrink-0" />}
+                              <span className="text-sm font-medium text-gray-900 break-words">{message.result.title}</span>
                             </div>
-                            <Button size="sm" variant="outline" className="mt-2">
+                            <Button size="sm" variant="outline">
                               Download
                             </Button>
                           </div>
@@ -120,7 +120,7 @@ export const PromptConsole: React.FC = () => {
                   ))}
                   {isLoading && (
                     <div className="flex justify-start">
-                      <div className="bg-gray-100 p-4 rounded-lg">
+                      <div className="bg-gray-100 p-3 lg:p-4 rounded-lg">
                         <div className="flex items-center space-x-2">
                           <div className="animate-spin rounded-full h-4 w-4 border-2 border-green-600 border-t-transparent"></div>
                           <span className="text-sm text-gray-600">AI is thinking...</span>
@@ -131,16 +131,16 @@ export const PromptConsole: React.FC = () => {
                 </div>
               </ScrollArea>
               
-              <Separator className="my-4" />
+              <Separator className="mb-3" />
               
-              <div className="space-y-3">
-                <div className="flex space-x-2">
+              <div className="flex-shrink-0 space-y-3">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Textarea
                     placeholder="Ask your AI CFO: Generate invoice, analyze expenses, create reports..."
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    className="flex-1"
-                    rows={2}
+                    className="flex-1 min-h-[80px] resize-none"
+                    rows={3}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -148,12 +148,18 @@ export const PromptConsole: React.FC = () => {
                       }
                     }}
                   />
-                  <div className="flex flex-col space-y-2">
-                    <Button size="sm" variant="outline">
+                  <div className="flex sm:flex-col gap-2">
+                    <Button size="sm" variant="outline" className="flex-1 sm:flex-none">
                       <Upload className="h-4 w-4" />
+                      <span className="sm:hidden ml-2">Upload</span>
                     </Button>
-                    <Button onClick={handleSubmit} disabled={!prompt.trim() || isLoading}>
+                    <Button 
+                      onClick={handleSubmit} 
+                      disabled={!prompt.trim() || isLoading}
+                      className="flex-1 sm:flex-none"
+                    >
                       <Send className="h-4 w-4" />
+                      <span className="sm:hidden ml-2">Send</span>
                     </Button>
                   </div>
                 </div>
@@ -162,24 +168,26 @@ export const PromptConsole: React.FC = () => {
           </Card>
         </div>
 
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Example Prompts</CardTitle>
+        <div className="flex-shrink-0 lg:flex-shrink lg:min-h-0">
+          <Card className="h-full">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Example Prompts</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {examplePrompts.map((example, index) => (
-                  <Button
-                    key={index}
-                    variant="ghost"
-                    className="w-full text-left justify-start h-auto p-3 text-sm"
-                    onClick={() => setPrompt(example)}
-                  >
-                    {example}
-                  </Button>
-                ))}
-              </div>
+            <CardContent className="p-4 pt-0">
+              <ScrollArea className="h-full">
+                <div className="space-y-2">
+                  {examplePrompts.map((example, index) => (
+                    <Button
+                      key={index}
+                      variant="ghost"
+                      className="w-full text-left justify-start h-auto p-3 text-sm whitespace-normal break-words"
+                      onClick={() => setPrompt(example)}
+                    >
+                      {example}
+                    </Button>
+                  ))}
+                </div>
+              </ScrollArea>
             </CardContent>
           </Card>
         </div>
