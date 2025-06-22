@@ -5,17 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
-import { Building, Loader } from 'lucide-react';
+import { Building, Loader, Info } from 'lucide-react';
 
 export const LoginForm: React.FC = () => {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, isMockMode } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const [loginData, setLoginData] = useState({
-    email: '',
-    password: ''
+    email: 'demo@company.com',
+    password: 'demo123'
   });
 
   const [signupData, setSignupData] = useState({
@@ -71,6 +72,15 @@ export const LoginForm: React.FC = () => {
           <CardTitle>Welcome to your AI CFO</CardTitle>
         </CardHeader>
         <CardContent>
+          {isMockMode && (
+            <Alert className="mb-4">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Demo Mode:</strong> Use demo@company.com / demo123 to login
+              </AlertDescription>
+            </Alert>
+          )}
+
           <Tabs defaultValue="login" className="space-y-4">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>

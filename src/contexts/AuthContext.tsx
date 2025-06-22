@@ -8,9 +8,13 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<any>;
   signUp: (email: string, password: string, companyName: string) => Promise<any>;
   signOut: () => Promise<void>;
+  isMockMode: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const isMockMode = import.meta.env.VITE_SUPABASE_URL === undefined || 
+                   import.meta.env.VITE_SUPABASE_URL === 'https://placeholder.supabase.co';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -35,8 +39,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     const result = await authService.signIn(email, password);
     if (result.data?.user) {
-      const transformedUser = await authService.getCurrentUser();
-      setUser(transformedUser);
+      if (isMockMode) {
+        // Set mock login state
+        localStorage.setItem('mock_logged_in', 'true');
+        setUser(result.data.user);
+      } else {
+        const transformedUser = await authService.getCurrentUser();
+        setUser(transformedUser);
+      }
     }
     return result;
   };
@@ -44,19 +54,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, companyName: string) => {
     const result = await authService.signUp(email, password, companyName);
     if (result.data?.user) {
-      const transformedUser = await authService.getCurrentUser();
-      setUser(transformedUser);
+      if (isMockMode) {
+        // Set mock login state
+        localStorage.setItem('mock_logged_in', 'true');
+        setUser(result.data.user);
+      } else {
+        const transformedUser = await authService.getCurrentUser();
+        setUser(transformedUser);
+      }
     }
     return result;
   };
 
   const signOut = async () => {
     await authService.signOut();
+    if (isMockMode) {
+      localStorage.removeItem('mock_logged_in');
+    }
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, isMockMode }}>
       {children}
     </AuthContext.Provider>
   );
