@@ -19,13 +19,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Check current auth state
     authService.getCurrentUser().then((currentUser) => {
-      setUser(currentUser as User);
+      setUser(currentUser);
       setLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = authService.onAuthStateChange((user) => {
-      setUser(user as User);
+      setUser(user);
       setLoading(false);
     });
 
@@ -35,7 +35,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     const result = await authService.signIn(email, password);
     if (result.data?.user) {
-      setUser(result.data.user as User);
+      const transformedUser = await authService.getCurrentUser();
+      setUser(transformedUser);
     }
     return result;
   };
@@ -43,7 +44,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, companyName: string) => {
     const result = await authService.signUp(email, password, companyName);
     if (result.data?.user) {
-      setUser(result.data.user as User);
+      const transformedUser = await authService.getCurrentUser();
+      setUser(transformedUser);
     }
     return result;
   };
