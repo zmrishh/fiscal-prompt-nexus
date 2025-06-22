@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +28,7 @@ import {
 import { Document, DocumentFilters, Collection } from '@/types/documents';
 import DocumentCard from '@/components/documents/DocumentCard';
 import DocumentFiltersComponent from '@/components/documents/DocumentFilters';
-import DocumentUpload from '@/components/documents/DocumentUpload';
+import SmartDocumentUpload from '@/components/documents/SmartDocumentUpload';
 
 const Documents: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -192,7 +191,8 @@ const Documents: React.FC = () => {
   };
 
   const handleUpload = (file: File, metadata: any) => {
-    console.log('Uploading file:', file, 'with metadata:', metadata);
+    console.log('Smart uploading file:', file, 'with metadata:', metadata);
+    // Here you would typically save to your backend
     setShowUpload(false);
   };
 
@@ -210,12 +210,12 @@ const Documents: React.FC = () => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Document Center</h1>
-            <p className="text-gray-600">Manage all your financial documents in one place</p>
+            <p className="text-gray-600">Manage all your financial documents with AI-powered processing</p>
           </div>
           <div className="flex space-x-3">
             <Button variant="outline" onClick={() => setShowUpload(true)}>
               <Upload className="h-4 w-4 mr-2" />
-              Upload
+              Smart Upload
             </Button>
             <Button className="bg-green-600 hover:bg-green-700">
               <Plus className="h-4 w-4 mr-2" />
@@ -374,8 +374,8 @@ const Documents: React.FC = () => {
         </Card>
 
         <Dialog open={showUpload} onOpenChange={setShowUpload}>
-          <DialogContent className="max-w-4xl">
-            <DocumentUpload
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <SmartDocumentUpload
               onUpload={handleUpload}
               onClose={() => setShowUpload(false)}
             />
