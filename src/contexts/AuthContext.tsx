@@ -39,6 +39,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     const result = await authService.signIn(email, password);
     if (result.data?.user) {
+      if (isMockMode) {
+        // Set mock login state
+        localStorage.setItem('mock_logged_in', 'true');
+      }
       // Always get the transformed user from authService
       const transformedUser = await authService.getCurrentUser();
       setUser(transformedUser);
@@ -49,6 +53,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, companyName: string) => {
     const result = await authService.signUp(email, password, companyName);
     if (result.data?.user) {
+      if (isMockMode) {
+        // Set mock login state
+        localStorage.setItem('mock_logged_in', 'true');
+      }
       // Always get the transformed user from authService
       const transformedUser = await authService.getCurrentUser();
       setUser(transformedUser);
