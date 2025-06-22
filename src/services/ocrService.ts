@@ -108,7 +108,7 @@ class OCRService {
       }
 
       // Extract invoice number
-      const invoiceMatch = line.match/(?:invoice no|bill no)[:\s]*([A-Z0-9-]+)/i);
+      const invoiceMatch = line.match(/(?:invoice no|bill no)[:\s]*([A-Z0-9-]+)/i);
       if (invoiceMatch) {
         invoiceNumber = invoiceMatch[1];
       }
