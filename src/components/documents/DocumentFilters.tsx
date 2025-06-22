@@ -18,6 +18,7 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon, X, Filter } from 'lucide-react';
 import { format } from 'date-fns';
+import { DateRange } from 'react-day-picker';
 import { DocumentFilters, DocumentType, DocumentStatus } from '@/types/documents';
 
 interface DocumentFiltersProps {
@@ -59,6 +60,12 @@ const DocumentFiltersComponent: React.FC<DocumentFiltersProps> = ({
     const value = filters[key as keyof DocumentFilters];
     return value !== undefined && value !== null && value !== '';
   });
+
+  // Convert our dateRange to DateRange type for the calendar
+  const calendarDateRange: DateRange | undefined = filters.dateRange?.from ? {
+    from: filters.dateRange.from,
+    to: filters.dateRange.to
+  } : undefined;
 
   return (
     <div className="space-y-4">
@@ -130,8 +137,11 @@ const DocumentFiltersComponent: React.FC<DocumentFiltersProps> = ({
               initialFocus
               mode="range"
               defaultMonth={filters.dateRange?.from}
-              selected={filters.dateRange}
-              onSelect={(range) => onFiltersChange({ ...filters, dateRange: range })}
+              selected={calendarDateRange}
+              onSelect={(range: DateRange | undefined) => onFiltersChange({ 
+                ...filters, 
+                dateRange: range ? { from: range.from, to: range.to } : undefined 
+              })}
               numberOfMonths={2}
             />
           </PopoverContent>
