@@ -1,57 +1,23 @@
 import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { 
-  FileText, 
-  Plus, 
-  Search, 
-  Upload, 
-  FolderPlus,
-  BarChart3,
-  Users,
-  Building,
-  FileSpreadsheet,
-  Shield,
-  TrendingUp,
-  Banknote
-} from 'lucide-react';
-import { Document, DocumentFilters, Collection } from '@/types/documents';
-import DocumentCard from '@/components/documents/DocumentCard';
-import DocumentFiltersComponent from '@/components/documents/DocumentFilters';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Document, DocumentFilters } from '@/types/documents';
+import DocumentSidebar from '@/components/documents/DocumentSidebar';
+import DocumentHeader from '@/components/documents/DocumentHeader';
+import DocumentGrid from '@/components/documents/DocumentGrid';
+import DocumentTable from '@/components/documents/DocumentTable';
+import DocumentViewer from '@/components/documents/DocumentViewer';
 import SmartDocumentUpload from '@/components/documents/SmartDocumentUpload';
 
 const Documents: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<DocumentFilters>({});
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showUpload, setShowUpload] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
-  const [collections, setCollections] = useState<Collection[]>([
-    {
-      id: '1',
-      name: 'Q1 2024 Pack',
-      description: 'Documents for Q1 2024',
-      documentIds: ['1', '2'],
-      createdAt: '2024-01-01'
-    },
-    {
-      id: '2',
-      name: 'VC Due Diligence',
-      description: 'Documents for investor review',
-      documentIds: ['3', '4'],
-      createdAt: '2024-01-10'
-    }
-  ]);
 
+  // Mock documents data
   const [documents] = useState<Document[]>([
     {
       id: '1',
@@ -103,17 +69,6 @@ const Documents: React.FC = () => {
     },
     {
       id: '5',
-      title: 'Salary Slip - December 2023',
-      type: 'Payroll Document',
-      category: 'payroll-docs',
-      issueDate: '2024-01-05',
-      status: 'completed',
-      tags: ['Payroll', 'Monthly'],
-      lastModified: '2024-01-05',
-      createdBy: 'HR Team'
-    },
-    {
-      id: '6',
       title: 'Board Resolution - Q4 2023',
       type: 'Legal Document',
       category: 'legal-compliance',
@@ -124,52 +79,19 @@ const Documents: React.FC = () => {
       createdBy: 'Legal Team'
     },
     {
-      id: '7',
-      title: 'Cap Table Export',
-      type: 'Investor Report',
-      category: 'investor-reports',
-      issueDate: '2024-01-12',
-      status: 'sent',
-      tags: ['Investor', 'Equity', 'Quarterly'],
-      lastModified: '2024-01-12',
-      createdBy: 'Finance Team'
-    },
-    {
-      id: '8',
-      title: 'HDFC Bank Statement',
-      type: 'Banking Document',
-      category: 'banking-documents',
-      entity: 'HDFC Bank',
+      id: '6',
+      title: 'Employee Salary Report',
+      type: 'Payroll Document',
+      category: 'payroll-docs',
       issueDate: '2024-01-01',
       status: 'completed',
-      tags: ['Banking', 'Statement', 'Monthly'],
+      tags: ['Payroll', 'Monthly', 'HR'],
       lastModified: '2024-01-01',
-      createdBy: 'Finance Team'
+      createdBy: 'HR Team'
     }
   ]);
 
-  const categoryIcons = {
-    'invoices': FileText,
-    'vendor-bills': FileSpreadsheet,
-    'financial-reports': BarChart3,
-    'payroll-docs': Users,
-    'tax-filings': Shield,
-    'legal-compliance': Building,
-    'investor-reports': TrendingUp,
-    'banking-documents': Banknote
-  };
-
-  const categoryLabels = {
-    'invoices': 'Invoices',
-    'vendor-bills': 'Vendor Bills',
-    'financial-reports': 'Financial Reports',
-    'payroll-docs': 'Payroll Documents',
-    'tax-filings': 'Tax Filings',
-    'legal-compliance': 'Legal & Compliance',
-    'investor-reports': 'Investor Reports',
-    'banking-documents': 'Banking Documents'
-  };
-
+  // Filter documents based on search, filters, and category
   const filteredDocuments = documents.filter(doc => {
     const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          doc.entity?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -179,199 +101,89 @@ const Documents: React.FC = () => {
     const matchesStatus = !filters.status || doc.status === filters.status;
     const matchesEntity = !filters.entity || doc.entity?.toLowerCase().includes(filters.entity.toLowerCase());
     
-    return matchesSearch && matchesType && matchesStatus && matchesEntity;
+    const matchesCategory = selectedCategory === 'all' || (() => {
+      switch (selectedCategory) {
+        case 'incorporation-legal':
+          return doc.category === 'legal-compliance';
+        case 'invoices-bills':
+          return doc.category === 'invoices' || doc.category === 'vendor-bills';
+        case 'payroll-hr':
+          return doc.category === 'payroll-docs';
+        case 'tax-compliance':
+          return doc.category === 'tax-filings';
+        case 'fundraising-investor':
+          return doc.category === 'investor-reports';
+        case 'bank-finance':
+          return doc.category === 'banking-documents' || doc.category === 'financial-reports';
+        default:
+          return true;
+      }
+    })();
+    
+    return matchesSearch && matchesType && matchesStatus && matchesEntity && matchesCategory;
   });
 
-  const getDocumentsByCategory = (category: string) => {
-    return filteredDocuments.filter(doc => doc.category === category);
+  // Calculate document counts by category
+  const documentCounts = {
+    'all': documents.length,
+    'incorporation-legal': documents.filter(d => d.category === 'legal-compliance').length,
+    'invoices-bills': documents.filter(d => d.category === 'invoices' || d.category === 'vendor-bills').length,
+    'payroll-hr': documents.filter(d => d.category === 'payroll-docs').length,
+    'tax-compliance': documents.filter(d => d.category === 'tax-filings').length,
+    'fundraising-investor': documents.filter(d => d.category === 'investor-reports').length,
+    'bank-finance': documents.filter(d => d.category === 'banking-documents' || d.category === 'financial-reports').length
   };
 
   const handleDocumentAction = (action: string, document: Document) => {
     console.log(`${action} action for document:`, document);
+    if (action === 'view') {
+      setSelectedDocument(document);
+    }
   };
 
   const handleUpload = (file: File, metadata: any) => {
-    console.log('Smart uploading file:', file, 'with metadata:', metadata);
-    // Here you would typically save to your backend
+    console.log('Uploading file:', file, 'with metadata:', metadata);
     setShowUpload(false);
   };
 
-  const upcomingFeatures = [
-    'GST auto-filing integration',
-    'One-click Form 16 generation',
-    'Cap Table PDF export',
-    'Automated vendor reconciliation',
-    'AI-powered document insights'
-  ];
-
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Document Center</h1>
-            <p className="text-gray-600">Manage all your financial documents with AI-powered processing</p>
-          </div>
-          <div className="flex space-x-3">
-            <Button variant="outline" onClick={() => setShowUpload(true)}>
-              <Upload className="h-4 w-4 mr-2" />
-              Smart Upload
-            </Button>
-            <Button className="bg-green-600 hover:bg-green-700">
-              <Plus className="h-4 w-4 mr-2" />
-              Create Document
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input 
-              placeholder="Search documents..." 
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <Button variant="outline">
-            <FolderPlus className="h-4 w-4 mr-2" />
-            New Collection
-          </Button>
-        </div>
-
-        <DocumentFiltersComponent
-          filters={filters}
-          onFiltersChange={setFilters}
-          onClearFilters={() => setFilters({})}
+      <div className="flex h-full">
+        <DocumentSidebar
+          selectedCategory={selectedCategory}
+          onCategorySelect={setSelectedCategory}
+          documentCounts={documentCounts}
         />
-
-        {collections.length > 0 && (
-          <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-gray-900">Collections</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {collections.map((collection) => (
-                <Card key={collection.id} className="hover:shadow-md transition-shadow cursor-pointer">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium text-gray-900">{collection.name}</h4>
-                        <p className="text-sm text-gray-500">{collection.description}</p>
-                        <Badge variant="outline" className="mt-2">
-                          {collection.documentIds.length} documents
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <Tabs defaultValue="all" className="space-y-4">
-          <TabsList className="grid grid-cols-5 lg:grid-cols-9 w-full">
-            <TabsTrigger value="all">All Documents</TabsTrigger>
-            {Object.entries(categoryLabels).map(([key, label]) => (
-              <TabsTrigger key={key} value={key} className="hidden sm:flex">
-                {label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <TabsContent value="all" className="space-y-4">
-            {filteredDocuments.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No documents found</h3>
-                  <p className="text-gray-500 mb-4">Try adjusting your search or filters</p>
-                  <Button onClick={() => setShowUpload(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Upload your first document
-                  </Button>
-                </CardContent>
-              </Card>
+        
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <DocumentHeader
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            filters={filters}
+            onFiltersChange={setFilters}
+            onClearFilters={() => setFilters({})}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            onUpload={() => setShowUpload(true)}
+            totalDocuments={filteredDocuments.length}
+          />
+          
+          <div className="flex-1 overflow-auto p-6">
+            {viewMode === 'grid' ? (
+              <DocumentGrid
+                documents={filteredDocuments}
+                onDocumentClick={setSelectedDocument}
+                onDocumentAction={handleDocumentAction}
+              />
             ) : (
-              <div className="grid gap-4">
-                {filteredDocuments.map((doc) => (
-                  <DocumentCard
-                    key={doc.id}
-                    document={doc}
-                    onView={(doc) => setSelectedDocument(doc)}
-                    onEdit={(doc) => handleDocumentAction('edit', doc)}
-                    onDownload={(doc) => handleDocumentAction('download', doc)}
-                    onShare={(doc) => handleDocumentAction('share', doc)}
-                    onAddToCollection={(doc) => handleDocumentAction('addToCollection', doc)}
-                  />
-                ))}
-              </div>
+              <DocumentTable
+                documents={filteredDocuments}
+                onDocumentClick={setSelectedDocument}
+                onDocumentAction={handleDocumentAction}
+              />
             )}
-          </TabsContent>
-
-          {Object.entries(categoryLabels).map(([categoryKey, categoryLabel]) => {
-            const categoryDocs = getDocumentsByCategory(categoryKey);
-            const IconComponent = categoryIcons[categoryKey as keyof typeof categoryIcons];
-            
-            return (
-              <TabsContent key={categoryKey} value={categoryKey} className="space-y-4">
-                <div className="flex items-center space-x-2 mb-4">
-                  <IconComponent className="h-5 w-5 text-gray-600" />
-                  <h2 className="text-xl font-semibold text-gray-900">{categoryLabel}</h2>
-                  <Badge variant="outline">{categoryDocs.length}</Badge>
-                </div>
-                
-                {categoryDocs.length === 0 ? (
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <IconComponent className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">
-                        No {categoryLabel.toLowerCase()} yet
-                      </h3>
-                      <p className="text-gray-500 mb-4">
-                        Start by uploading or creating your first document
-                      </p>
-                      <Button onClick={() => setShowUpload(true)}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add {categoryLabel.slice(0, -1)}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid gap-4">
-                    {categoryDocs.map((doc) => (
-                      <DocumentCard
-                        key={doc.id}
-                        document={doc}
-                        onView={(doc) => setSelectedDocument(doc)}
-                        onEdit={(doc) => handleDocumentAction('edit', doc)}
-                        onDownload={(doc) => handleDocumentAction('download', doc)}
-                        onShare={(doc) => handleDocumentAction('share', doc)}
-                        onAddToCollection={(doc) => handleDocumentAction('addToCollection', doc)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-            );
-          })}
-        </Tabs>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Features</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {upcomingFeatures.map((feature, index) => (
-                <div key={index} className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-gray-700">{feature}</span>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         <Dialog open={showUpload} onOpenChange={setShowUpload}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -382,16 +194,12 @@ const Documents: React.FC = () => {
           </DialogContent>
         </Dialog>
 
-        <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
-          <DialogContent className="max-w-4xl">
-            <DialogHeader>
-              <DialogTitle>{selectedDocument?.title}</DialogTitle>
-            </DialogHeader>
-            <div className="p-6">
-              <p className="text-gray-600">Document preview and details would go here.</p>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <DocumentViewer
+          document={selectedDocument}
+          isOpen={!!selectedDocument}
+          onClose={() => setSelectedDocument(null)}
+          onAction={handleDocumentAction}
+        />
       </div>
     </DashboardLayout>
   );
